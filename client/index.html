@@ -3,7 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b0c10" />
+    <meta name="theme-color" content="#f4f5f6" />
+    <script>
+      // 首屏渲染前应用已保存的主题，避免暗色用户先看到一瞬亮色（默认亮色）。
+      (function () {
+        try {
+          if (localStorage.getItem('dovideo-theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#0b0c10');
+          }
+        } catch (e) {
+          /* 隐私模式下 localStorage 不可用，忽略 */
+        }
+      })();
+    </script>
     <meta
       name="description"
       content="DOVideo · 目标驱动的视频内容理解平台：上传视频后提取语音文字，由 Agent 按你的目标生成带时间戳证据的结构化产物。"
