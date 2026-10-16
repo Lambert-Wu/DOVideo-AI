@@ -5,6 +5,7 @@ import com.example.server.dto.MediaSummary;
 import com.example.server.entity.MediaFile;
 import com.example.server.service.AuthService;
 import com.example.server.service.ChunkUploadService;
+import com.example.server.service.MediaCoverService;
 import com.example.server.service.MediaIngestService;
 import com.example.server.service.MediaService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,13 +27,16 @@ public class MediaController {
     private final ChunkUploadService chunkUploadService;
     private final MediaIngestService mediaIngestService;
     private final MediaService mediaService;
+    private final MediaCoverService mediaCoverService;
 
     public MediaController(ChunkUploadService chunkUploadService,
                            MediaIngestService mediaIngestService,
-                           MediaService mediaService) {
+                           MediaService mediaService,
+                           MediaCoverService mediaCoverService) {
         this.chunkUploadService = chunkUploadService;
         this.mediaIngestService = mediaIngestService;
         this.mediaService = mediaService;
+        this.mediaCoverService = mediaCoverService;
     }
 
     // 说明：下列方法上的 throws 源于 service 层声明了受检异常（throws Exception/IOException）。
@@ -85,8 +89,21 @@ public class MediaController {
     public Result<List<MediaSummary>> getList(
             @RequestAttribute(AuthService.REQUEST_USER_ID) Long userId) {
         return Result.ok(mediaService.listByUser(userId).stream()
-                .map(MediaSummary::from)
+                .map(mediaFile -> MediaSummary.from(mediaFile, mediaService::clientReadableSource))
                 .toList());
+    }
+
+    /**
+     * 卡片封面（视频第一帧）。已有封面直接回地址；没有就现抽一帧并落库，
+     * 抽不出来返回 null，前端退回占位图标。
+     */
+    @GetMapping("/cover")
+    public Result<String> cover(@RequestParam Long id,
+                                @RequestAttribute(AuthService.REQUEST_USER_ID) Long userId) {
+        MediaFile mediaFile = mediaService.requireOwnedMedia(id, userId);
+        MediaCoverService.CoverResult cover = mediaCoverService.ensureCover(mediaFile);
+        if (cover.generated()) mediaService.invalidateUserList(userId);
+        return Result.ok(cover.url());
     }
 
     @GetMapping("/playback")

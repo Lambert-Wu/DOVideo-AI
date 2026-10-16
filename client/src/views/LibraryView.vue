@@ -183,7 +183,13 @@
             </button>
             <div class="card-meta">
               <div class="meta-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                <img
+                    v-if="item.coverUrl"
+                    :src="item.coverUrl"
+                    :alt="`${item.filename} 首帧`"
+                    loading="lazy"
+                />
+                <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
               </div>
               <div class="meta-info">
                 <div class="filename-mask" :title="item.filename">{{ item.filename }}</div>
@@ -525,6 +531,7 @@ import {
 import { DEMO_ITEM } from '../demoData'
 import { taskStreams, onActiveTasksChange } from '../taskStreams.js'
 import { setMediaItems } from '../mediaCache.js'
+import { loadMissingCovers } from '../mediaCovers.js'
 import { useAnalysisWorkspace } from '../useAnalysisWorkspace'
 import { useTheme } from '../useTheme.js'
 
@@ -920,6 +927,19 @@ const dismissMessage = () => {
   messageIsError.value = false
 }
 
+/**
+ * 封面是后端收到请求才现抽的（ffmpeg 抽首帧），不能挡着列表渲染：
+ * 列表先出来，缺封面的条目在后台按有限并发补，补到再回填。
+ */
+const reloadCovers = (items, isCurrentRequest) => {
+  loadMissingCovers(items, async id => {
+    if (!isCurrentRequest()) return null
+    const res = await apiRequest(`/media/cover?id=${id}`)
+    if (!res.ok) return null
+    return await res.json()
+  }).catch(error => console.warn('media covers unavailable', error))
+}
+
 /** silent：保留现有列表与滚动位置，在后台刷新，不显示整页 loading（从 Agent 页返回时用）。 */
 const fetchList = async ({ notify = false, silent = false } = {}) => {
   const requestVersion = ++listRequestVersion
@@ -944,6 +964,7 @@ const fetchList = async ({ notify = false, silent = false } = {}) => {
     list.value = media
     listLoadedOnce = true
     setMediaItems(media)
+    reloadCovers(media, isCurrentRequest)
   } catch (error) {
     if (!isCurrentRequest()) return null
     console.error(error)

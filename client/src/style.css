@@ -260,6 +260,8 @@ html, body, #app {
 .project-card:hover { transform: translateY(-2px); border-color: var(--accent); }
 .card-meta { display: flex; gap: 1.5rem; padding: 1.5rem; align-items: center; border-bottom: 1px solid var(--border-tech); background: var(--bg-inset); }
 .meta-icon { width: 56px; height: 56px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent); }
+/* 有首帧就用视频第一帧，没有才回退到上面的摄影机图标；object-fit 让 16:9 的画面填满这个方块。 */
+.meta-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; display: block; }
 .filename-mask { font-size: 1.1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
 .meta-tags { display: flex; gap: 12px; font-size: 0.85rem; font-family: monospace; margin-top: 5px; }
 .time-tag { color: var(--text-sub); }

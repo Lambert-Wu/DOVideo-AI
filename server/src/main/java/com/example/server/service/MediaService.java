@@ -157,6 +157,12 @@ public class MediaService {
                         mediaId, mediaFile.getFilePath(), e);
             }
         }
+        // 封面是和视频一起生成的独立对象，删视频时顺手清掉，别在桶里留孤儿。
+        cleanupArtifact(mediaId, "cover", () -> {
+            if (minioUtils.isManagedFile(mediaFile.getCoverUrl(), MediaCoverService.COVER_OBJECT_PREFIX)) {
+                minioUtils.removeFile(mediaFile.getCoverUrl());
+            }
+        });
         purgeRuntimeArtifacts(mediaId);
         invalidateUserList(userId);
     }
