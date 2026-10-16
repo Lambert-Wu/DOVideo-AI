@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
     envDir: '..',
     plugins: [vue()],
     server: {
-      allowedHosts: ['.trycloudflare.com'],
+      allowedHosts: ['.trycloudflare.com', '.ngrok-free.dev'],
       proxy: {
         ...apiProxy,
         // 预签名播放/封面地址的对外前缀（后端 MINIO_PUBLIC_BASE=/minio）。
