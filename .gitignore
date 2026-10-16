@@ -13,3 +13,4 @@ redis/data/
 qdrant/data/
 minio/data/
  
+secrets/
