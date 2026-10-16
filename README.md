@@ -20,12 +20,6 @@
 
 致力于将长视频转化为可检索、可追溯、可继续追问的结构化知识。
 
-<div align="center">
-
-[![Star History Chart](https://star-history.dera.page/svg?repos=Xiaoc7r/DOVideo-AI&type=Date)](https://star-history.dera.page/#Xiaoc7r/DOVideo-AI&Date)
-
-</div>
-
 
 </div>
 
