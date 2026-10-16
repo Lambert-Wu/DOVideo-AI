@@ -1,0 +1,16 @@
+# 本地运维覆盖：为中间件容器开启自动重启。
+# docker compose 会自动合并本文件，因此无需修改 docker-compose.yml。
+# 这样 Docker 守护进程启动时（开机）会自动拉起这些容器，容器崩溃也会自动重启。
+services:
+  mysql:
+    restart: unless-stopped
+  redis:
+    restart: unless-stopped
+  qdrant:
+    restart: unless-stopped
+  minio:
+    restart: unless-stopped
+  rmqnamesrv:
+    restart: unless-stopped
+  rmqbroker:
+    restart: unless-stopped
